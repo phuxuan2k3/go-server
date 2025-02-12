@@ -1,0 +1,87 @@
+syntax = "proto3";
+
+package suggest;
+
+option go_package = "myproject/pkg/suggest";
+
+import "google/api/annotations.proto";
+
+service SuggestService {
+    rpc SuggestCriteria (SuggestCriteriaRequest) returns (SuggestCriteriaResponse) {
+        option (google.api.http) = {
+        post: "/v1/suggest_criteria"
+        body: "*"
+        };
+    }
+
+    rpc SuggestOptions (SuggestOptionsRequest) returns (SuggestOptionsResponse) {
+        option (google.api.http) = {
+        post: "/v1/suggest_options"
+        body: "*"
+        };
+    }
+
+    rpc SuggestQuestions (SuggestQuestionsRequest) returns (SuggestQuestionsResponse) {
+        option (google.api.http) = {
+        post: "/v1/suggest_questions"
+        body: "*"
+        };
+    }
+} 
+
+message GeneralInfo {
+    string title = 1;
+    string description = 2;
+    string duration =3;
+    string difficulty = 4;
+    int32 maxNumberOfQuestions = 5;
+}
+
+message CriteriaEleRequest {
+    string criteria =1;
+    string chosenOption =2;
+}
+
+
+message SuggestCriteriaRequest {
+    GeneralInfo generalInfo = 1;
+    repeated CriteriaEleRequest criteriaList = 2;
+}
+
+message CriteriaEleResponse {
+    string criteria =1;
+    repeated string optionList =2;
+}
+
+message SuggestCriteriaResponse {
+    repeated CriteriaEleResponse criteriaList = 1;
+}
+
+message SuggestOptionsRequest {
+    GeneralInfo generalInfo = 1;
+    repeated CriteriaEleRequest criteriaList = 2;
+    string newCriteria = 3;
+}
+
+message SuggestOptionsResponse {
+    CriteriaEleResponse criteriaList = 1;
+}
+
+message AnswerOption {
+    string optionContent = 1;
+    bool isCorrect = 2;
+}
+
+message Question {
+    string questionContent = 1;
+    repeated AnswerOption optionList = 2;
+}
+
+message SuggestQuestionsRequest {
+    GeneralInfo generalInfo = 1;
+    repeated CriteriaEleRequest criteriaList = 2;
+}
+
+message SuggestQuestionsResponse {
+    repeated Question questionList = 1;
+}
