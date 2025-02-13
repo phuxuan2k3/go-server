@@ -29,7 +29,7 @@ to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		conn, err := grpc.DialContext(
 			context.Background(),
-			"localhost:50051",
+			"darius-grpc:50051", // if you run this locally, change this to localhost:50051
 			grpc.WithTransportCredentials(insecure.NewCredentials()),
 		)
 		if err != nil {

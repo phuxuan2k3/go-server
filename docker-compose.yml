@@ -1,26 +1,25 @@
 version: '3.8'
-
 services:
   darius-grpc:
-    image: darius-app
     container_name: darius-grpc
+    image: phuxuan2k3/darius:latest
+    command: ["grpc"]
     ports:
       - "50051:50051"
     networks:
-      - darius-network
+      - darius_network
 
   darius-gateway:
-    image: darius-app
     container_name: darius-gateway
+    image: phuxuan2k3/darius:latest
+    command: ["gateway"]
     depends_on:
       - darius-grpc
-    environment:
-      - GRPC_SERVER=darius-grpc:50051  # Dùng tên service thay vì localhost
     ports:
       - "8080:8080"
     networks:
-      - darius-network
+      - darius_network
 
 networks:
-  darius-network:
+  darius_network:
     driver: bridge
