@@ -5,6 +5,7 @@ package cmd
 
 import (
 	"darius/internal/handler"
+	"darius/internal/llm"
 	hello "darius/pkg/proto/hello"
 	suggest "darius/pkg/proto/suggest"
 	"fmt"
@@ -34,7 +35,14 @@ to quickly create a Cobra application.`,
 			log.Fatalf("Failed to listen: %v", err)
 		}
 
-		handler := handler.NewHandlerWithDeps(handler.Dependency{})
+		LlmService := llm.NewLLM(&llm.Config{
+			Host: "localhost",
+			Port: "8080",
+		})
+
+		handler := handler.NewHandlerWithDeps(handler.Dependency{
+			LlmService: LlmService,
+		})
 
 		grpcServer := grpc.NewServer()
 		hello.RegisterHelloServiceServer(grpcServer, handler)
