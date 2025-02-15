@@ -1,0 +1,12 @@
+{
+    "generalInfo": {
+        "title": "Math Proficiency Test",
+        "description": "A test to evaluate basic math skills for high school students.",
+        "duration": "60 minutes",
+        "difficulty": "Medium",
+        "maxNumberOfQuestions": 30
+    },
+    "criteriaList": [
+    ]
+}
+    

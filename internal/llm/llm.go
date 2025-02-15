@@ -33,7 +33,7 @@ func NewLLM(config *Config) *llmInstance {
 }
 
 func (l *llmInstance) Generate(ctx context.Context, req *LLMRequest) (*LLMResponse, error) {
-	url := viper.GetString("llm.host")
+	url := l.config.Host
 	data, err := json.Marshal(req)
 	if err != nil {
 		fmt.Println("Error marshalling request:", err)
@@ -58,6 +58,7 @@ func (l *llmInstance) Generate(ctx context.Context, req *LLMRequest) (*LLMRespon
 	defer llmResp.Body.Close()
 
 	// Đọc response
+	fmt.Println("response body:", llmResp.Body)
 	var response LLMResponse
 	if err := json.NewDecoder(llmResp.Body).Decode(&response); err != nil {
 		fmt.Println("Error decoding response:", err)

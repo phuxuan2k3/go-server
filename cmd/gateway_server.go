@@ -11,6 +11,21 @@ import (
 	"google.golang.org/grpc"
 )
 
+func corsMiddleware(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+
+		h.ServeHTTP(w, r)
+	})
+}
+
 func startGateway() {
 	// conn, err := grpc.DialContext(
 	// 	context.Background(),
@@ -38,5 +53,10 @@ func startGateway() {
 
 	gatewayPort := viper.GetString("gateway.port")
 	log.Println("HTTP Gateway running on port " + gatewayPort)
-	http.ListenAndServe(":"+gatewayPort, mux)
+
+	server := &http.Server{
+		Addr:    ":" + gatewayPort,
+		Handler: corsMiddleware(mux),
+	}
+	server.ListenAndServe()
 }

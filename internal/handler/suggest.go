@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"log"
 	"regexp"
+	"strings"
+	"unicode"
 
 	"github.com/spf13/viper"
 )
@@ -31,8 +33,29 @@ func (h *handler) SuggestCriteria(ctx context.Context, req *suggest.SuggestCrite
 
 	criteriaList := req.GetCriteriaList()
 	if criteriaList == nil {
-		log.Println("criteriaList is nil")
-		return nil, nil
+		return &suggest.SuggestCriteriaResponse{
+			CriteriaList: []*suggest.CriteriaEleResponse{
+				{
+					Criteria: "Test Subject Area",
+					OptionList: []string{
+						"Computer Networks",
+						"Hardware",
+						"Software Development"},
+				},
+				{
+					Criteria:   "Difficulty Level:",
+					OptionList: []string{"Beginner", "Intermediate", "Advanced"},
+				},
+				{
+					Criteria:   "Test Format:",
+					OptionList: []string{"Multiple Choice", "True/False", "Essay"},
+				},
+				{
+					Criteria:   "Test Duration:",
+					OptionList: []string{"30 minutes", "60 minutes", "90 minutes"},
+				},
+			},
+		}, nil
 	}
 
 	prompt := fmt.Sprintf(`
@@ -191,8 +214,15 @@ func extractJSONQuestions(input string) (string, error) {
 	re := regexp.MustCompile(`(?s)\[\s*\{.*\}\s*\]`)
 	match := re.FindString(input)
 	if match == "" {
+		fmt.Println("extractJSONQuestions: Không tìm thấy JSON hợp lệ")
 		return "", fmt.Errorf("không tìm thấy JSON hợp lệ")
 	}
+
+	match, err := sanitizeJSON(match)
+	if err != nil {
+		return "", fmt.Errorf("lỗi vệ sinh JSON: %v", err)
+	}
+
 	return match, nil
 }
 
@@ -209,7 +239,41 @@ func parseCriterias(jsonStr string) ([]*suggest.CriteriaEleResponse, error) {
 	var criterias []*suggest.CriteriaEleResponse
 	err := json.Unmarshal([]byte(jsonStr), &criterias)
 	if err != nil {
+		fmt.Println("parseCriterias: Lỗi giải mã JSON:", err)
 		return nil, fmt.Errorf("lỗi giải mã JSON: %v", err)
 	}
 	return criterias, nil
+}
+
+func sanitizeJSON(jsonStr string) (string, error) {
+	reComment := regexp.MustCompile(`(?m)^\s*//.*$`)
+	cleaned := reComment.ReplaceAllString(jsonStr, "")
+
+	var builder strings.Builder
+	for _, r := range cleaned {
+		if r < 0x20 && r != '\n' && r != '\r' && r != '\t' {
+			continue
+		}
+		if !unicode.IsPrint(r) && r != '\n' && r != '\r' && r != '\t' {
+			continue
+		}
+		builder.WriteRune(r)
+	}
+	sanitized := builder.String()
+
+	if json.Valid([]byte(sanitized)) {
+		return sanitized, nil
+	}
+
+	start := strings.IndexAny(sanitized, "{[")
+	end := strings.LastIndexAny(sanitized, "}]")
+	if start != -1 && end != -1 && end > start {
+		candidate := sanitized[start : end+1]
+		if json.Valid([]byte(candidate)) {
+			return candidate, nil
+		}
+	}
+
+	fmt.Println("sanitizeJSON: Chuỗi JSON chứa ký tự không thể vệ sinh")
+	return "", fmt.Errorf("chuỗi json chứa ký tự không thể vệ sinh")
 }
