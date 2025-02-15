@@ -7,6 +7,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"regexp"
+
+	"github.com/spf13/viper"
 )
 
 func (h *handler) SuggestOptions(ctx context.Context, req *suggest.SuggestOptionsRequest) (*suggest.SuggestOptionsResponse, error) {
@@ -66,28 +69,32 @@ You are an expert in designing tests and assessments. Your task is to analyze th
 Now, based on the user's input, generate the output in the specified format.
 `, generalInfo, criteriaList)
 
-	llmResponse, err := h.llmService.GenerateCriteria(ctx, &llm.LLMRequest{
+	llmResponse, err := h.llmService.Generate(ctx, &llm.LLMRequest{
+		Model:  viper.GetString("llm.model"),
 		Prompt: prompt,
+		Stream: false,
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	var criteriaListResp []*suggest.CriteriaEleResponse
-	if err := json.Unmarshal([]byte(llmResponse.Response), &criteriaListResp); err != nil {
+	input := llmResponse.Response
+
+	jsonStr, err := extractJSONQuestions(input)
+	if err != nil {
+		fmt.Println("Lỗi:", err)
 		return nil, err
 	}
 
-	log.Println("criteriaListResp", criteriaListResp)
+	// Parse JSON
+	criteriaResp, err := parseCriterias(jsonStr)
+	if err != nil {
+		fmt.Println("Lỗi:", err)
+		return nil, err
+	}
 
 	return &suggest.SuggestCriteriaResponse{
-		// CriteriaList: []*suggest.CriteriaEleResponse{
-		// 	{
-		// 		Criteria:   "criteria1",
-		// 		OptionList: []string{"option1", "option2", "option3"},
-		// 	},
-		// },
-		CriteriaList: criteriaListResp,
+		CriteriaList: criteriaResp,
 	}, nil
 }
 
@@ -149,22 +156,60 @@ You are an expert in creating test questions and answers. Your task is to genera
      },
      ...
    ]
-Now, based on the user's input, generate the output in the specified format.
+Now, based on the user's input, generate the output in the specified format
 
 	`, generalInfo, criteriaList)
-	llmResponse, err := h.llmService.GenerateQuestion(ctx, &llm.LLMRequest{
+	llmResponse, err := h.llmService.Generate(ctx, &llm.LLMRequest{
+		Model:  viper.GetString("llm.model"),
 		Prompt: prompt,
+		Stream: false,
 	})
 	if err != nil {
 		return nil, err
 	}
+	input := llmResponse.Response
 
-	var questionListResp []*suggest.Question
-	if err := json.Unmarshal([]byte(llmResponse.Response), &questionListResp); err != nil {
+	jsonStr, err := extractJSONQuestions(input)
+	if err != nil {
+		fmt.Println("Lỗi:", err)
+		return nil, err
+	}
+
+	// Parse JSON
+	questionListResp, err := parseQuestions(jsonStr)
+	if err != nil {
+		fmt.Println("Lỗi:", err)
 		return nil, err
 	}
 
 	return &suggest.SuggestQuestionsResponse{
 		QuestionList: questionListResp,
 	}, nil
+}
+
+func extractJSONQuestions(input string) (string, error) {
+	re := regexp.MustCompile(`(?s)\[\s*\{.*\}\s*\]`)
+	match := re.FindString(input)
+	if match == "" {
+		return "", fmt.Errorf("không tìm thấy JSON hợp lệ")
+	}
+	return match, nil
+}
+
+func parseQuestions(jsonStr string) ([]*suggest.Question, error) {
+	var questions []*suggest.Question
+	err := json.Unmarshal([]byte(jsonStr), &questions)
+	if err != nil {
+		return nil, fmt.Errorf("lỗi giải mã JSON: %v", err)
+	}
+	return questions, nil
+}
+
+func parseCriterias(jsonStr string) ([]*suggest.CriteriaEleResponse, error) {
+	var criterias []*suggest.CriteriaEleResponse
+	err := json.Unmarshal([]byte(jsonStr), &criterias)
+	if err != nil {
+		return nil, fmt.Errorf("lỗi giải mã JSON: %v", err)
+	}
+	return criterias, nil
 }

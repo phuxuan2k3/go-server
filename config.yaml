@@ -1,0 +1,9 @@
+llm:
+  host: "https://ccc6-115-74-121-121.ngrok-free.app/api/generate"
+  model: "mistral"
+grpc:
+  host: "0.0.0.0"
+  port: 50051
+gateway:
+  host: "localhost"
+  port: 8080

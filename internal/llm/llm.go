@@ -1,13 +1,20 @@
 package llm
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
+	"log"
+	"net/http"
+
+	"github.com/spf13/viper"
 )
 
 type LLM interface {
 	GenerateCriteria(ctx context.Context, req *LLMRequest) (*LLMResponse, error)
 	GenerateQuestion(ctx context.Context, req *LLMRequest) (*LLMResponse, error)
+	Generate(ctx context.Context, req *LLMRequest) (*LLMResponse, error)
 }
 
 type llmInstance struct {
@@ -17,8 +24,7 @@ type llmInstance struct {
 func NewLLM(config *Config) *llmInstance {
 	if config == nil {
 		config = &Config{
-			Host: "localhost",
-			Port: "8080", //xtodo: set port of llm server here
+			Host: viper.GetString("llm.host"),
 		}
 	}
 	return &llmInstance{
@@ -26,35 +32,75 @@ func NewLLM(config *Config) *llmInstance {
 	}
 }
 
+func (l *llmInstance) Generate(ctx context.Context, req *LLMRequest) (*LLMResponse, error) {
+	url := viper.GetString("llm.host")
+	data, err := json.Marshal(req)
+	if err != nil {
+		fmt.Println("Error marshalling request:", err)
+		return nil, err
+	}
+
+	llmReq, err := http.NewRequest("POST", url, bytes.NewBuffer(data))
+	if err != nil {
+		fmt.Println("Error creating request:", err)
+		return nil, err
+	}
+
+	llmReq.Header.Set("Content-Type", "application/json")
+
+	// Gửi request
+	client := &http.Client{}
+	llmResp, err := client.Do(llmReq)
+	if err != nil {
+		fmt.Println("Error sending request:", err)
+		return nil, err
+	}
+	defer llmResp.Body.Close()
+
+	// Đọc response
+	var response LLMResponse
+	if err := json.NewDecoder(llmResp.Body).Decode(&response); err != nil {
+		fmt.Println("Error decoding response:", err)
+		return nil, err
+	}
+
+	log.Println("response", response)
+
+	return &response, nil
+}
+
 func (l *llmInstance) GenerateCriteria(ctx context.Context, req *LLMRequest) (*LLMResponse, error) {
 
 	//xtodo : implement the logic to generate LLM
 
 	return &LLMResponse{
+		Model:      "",
+		Created_at: "",
 		Response: fmt.Sprintf(`
-		[
-  {
-    "criteria": "Question Type",
-    "optionList": [
-      "Short Answer",
-      "True or False",
-      "Fill in the Blank",
-      "Matching",
-      "Word Problems"
-    ]
-  },
-  {
-    "criteria": "Topics Covered",
-    "optionList": [
-      "Geometry",
-      "Trigonometry",
-      "Statistics and Probability",
-      "Number Theory",
-      "Functions and Graphs"
-    ]
-  }
-]
-		`),
+				[
+		  {
+		    "criteria": "Question Type",
+		    "optionList": [
+		      "Short Answer",
+		      "True or False",
+		      "Fill in the Blank",
+		      "Matching",
+		      "Word Problems"
+		    ]
+		  },
+		  {
+		    "criteria": "Topics Covered",
+		    "optionList": [
+		      "Geometry",
+		      "Trigonometry",
+		      "Statistics and Probability",
+		      "Number Theory",
+		      "Functions and Graphs"
+		    ]
+		  }
+		]
+				`),
+		Done_reason: "",
 	}, nil
 }
 func (l *llmInstance) GenerateQuestion(ctx context.Context, req *LLMRequest) (*LLMResponse, error) {

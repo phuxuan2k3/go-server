@@ -1,25 +1,12 @@
-version: '3.8'
+version: "3.8"
+
 services:
-  darius-grpc:
-    container_name: darius-grpc
-    image: phuxuan2k3/darius:latest
-    command: ["grpc"]
+  grpc_server:
+    build: .
+    container_name: grpc_server
     ports:
       - "50051:50051"
-    networks:
-      - darius_network
-
-  darius-gateway:
-    container_name: darius-gateway
-    image: phuxuan2k3/darius:latest
-    command: ["gateway"]
-    depends_on:
-      - darius-grpc
-    ports:
       - "8080:8080"
-    networks:
-      - darius_network
-
-networks:
-  darius_network:
-    driver: bridge
+    environment:
+      - GIN_MODE=release
+    restart: unless-stopped

@@ -4,9 +4,11 @@ Copyright © 2025 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -21,15 +23,15 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
-	// Run: func(cmd *cobra.Command, args []string) {},
+	Run: func(cmd *cobra.Command, args []string) {
+		go startGRPC()
+		startGateway()
+	},
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
-	rootCmd.AddCommand(lol)
-	rootCmd.AddCommand(gateway)
-	rootCmd.AddCommand(start_grpc)
 	err := rootCmd.Execute()
 	if err != nil {
 		os.Exit(1)
@@ -46,4 +48,14 @@ func init() {
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+
+	// Cấu hình Viper để đọc tệp YAML
+	viper.SetConfigName("config") // Tên tệp (không bao gồm phần mở rộng)
+	viper.SetConfigType("yaml")   // Loại tệp
+	viper.AddConfigPath(".")      // Thư mục chứa tệp cấu hình
+
+	// Đọc tệp cấu hình
+	if err := viper.ReadInConfig(); err != nil {
+		panic(fmt.Errorf("Lỗi khi đọc tệp cấu hình: %w", err))
+	}
 }
