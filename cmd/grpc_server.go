@@ -20,6 +20,9 @@ func startGRPC() {
 		log.Fatalf("Failed to listen: %v", err)
 	}
 
+	// fmt.Println("get env config.yaml" + viper.GetString("llm.host"))
+	// fmt.Println("get env config.yaml" + viper.GetString("llm.model"))
+
 	LlmService := llm.NewLLM(&llm.Config{
 		Host: viper.GetString("llm.host"),
 	})

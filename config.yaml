@@ -1,9 +1,9 @@
 llm:
-  host: "https://5cda-115-74-119-212.ngrok-free.app/api/generate"
-  model: "deepseek-r1"
+  host: ${LLM_HOST}
+  model: ${LLM_MODEL}
 grpc:
   host: "0.0.0.0"
   port: 50051
 gateway:
-  host: "localhost"
+  host: "0.0.0.0"
   port: 8080
