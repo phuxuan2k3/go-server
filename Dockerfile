@@ -23,6 +23,7 @@ RUN apk --no-cache add ca-certificates
 
 # Copy binary từ stage builder
 COPY --from=builder /app/darius .
+COPY config.yaml /root/config.yaml
 
 # Cấp quyền thực thi cho file binary
 RUN chmod +x /root/darius
