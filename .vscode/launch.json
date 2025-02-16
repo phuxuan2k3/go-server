@@ -9,8 +9,8 @@
         "cwd": "${workspaceFolder}/",
         "program": "${workspaceFolder}/main.go",
         "env": {
-          "LLM_HOST": "xin chao",
-          "LLM_MODEL": "model_name"
+          "LLM_HOST": "https://5cda-115-74-119-212.ngrok-free.app/api/generate",
+          "LLM_MODEL": "llama3.1"
         //   "DATABASE_NAME": "ekko",
         //   "DATABASE_USERNAME": "root",
         //   "DATABASE_PASSWORD": "trung113"

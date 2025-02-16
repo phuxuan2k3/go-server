@@ -34,6 +34,7 @@ func NewLLM(config *Config) *llmInstance {
 
 func (l *llmInstance) Generate(ctx context.Context, req *LLMRequest) (*LLMResponse, error) {
 	url := l.config.Host
+	req.Model = viper.GetString("llm.model")
 	data, err := json.Marshal(req)
 	if err != nil {
 		fmt.Println("Error marshalling request:", err)
