@@ -122,29 +122,24 @@ Now, based on the user's input, generate the output in the specified format.
 }
 
 func (h *handler) SuggestQuestions(ctx context.Context, req *suggest.SuggestQuestionsRequest) (*suggest.SuggestQuestionsResponse, error) {
-	generalInfo := req.GetGeneralInfo()
-	if generalInfo == nil {
-		log.Println("generalInfo is nil")
-		return nil, nil
-	}
-
-	criteriaList := req.GetCriteriaList()
-	if criteriaList == nil {
-		log.Println("criteriaList is nil")
-		return nil, nil
-	}
-
 	prompt := fmt.Sprintf(`
 You are an expert in creating test questions and answers. Your task is to generate a set of questions and answers based on the provided test information and guidelines. Follow these steps:
 1. Input Provided by the User:
    - General Information:
-     %v
-   - Criteria List (guidelines):
-     %v
+    Name: %v,
+	Description: %v,
+	Fields: %v,
+	Duration: %v,
+	Difficulty: %v,
+	QuestionType: %v,
+	Language: %v,
+	Options: %v,
+	NumberOfQuestion: %v,
+	CandidateSeniority: %v,
+	Context: %v
 2. Your Task:
    - Review the general information about the test to understand its context, purpose, and constraints.
-   - Analyze the list of criteria and the user's chosen options for each criterion.
-   - Generate a set of questions and answers that align with the test's context, difficulty level, and chosen criteria.
+   - Generate a set of questions and answers that align with the test's context, difficulty level, and format.
    - Ensure the questions are clear, precise, and meaningful.
    - Provide the output in the specified JSON format.
 3. Output Format:
@@ -181,7 +176,9 @@ You are an expert in creating test questions and answers. Your task is to genera
    ]
 Now, based on the user's input, generate the output in the specified format
 
-	`, generalInfo, criteriaList)
+	`, req.GetName(), req.GetDescription(), req.GetFields(), req.GetDuration(), req.GetDifficulty(), req.GetQuestionType(), req.GetLanguage(), req.GetOptions(), req.GetNumberOfQuestion(), req.GetCandidateSeniority(), req.GetContext())
+	fmt.Println(prompt)
+
 	llmResponse, err := h.llmService.Generate(ctx, &llm.LLMRequest{
 		Model:  viper.GetString("llm.model"),
 		Prompt: prompt,

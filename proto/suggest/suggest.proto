@@ -77,11 +77,25 @@ message Question {
     repeated AnswerOption optionList = 2;
 }
 
-message SuggestQuestionsRequest {
-    GeneralInfo generalInfo = 1;
-    repeated CriteriaEleRequest criteriaList = 2;
-}
+// message SuggestQuestionsRequest {
+//     GeneralInfo generalInfo = 1;
+//     repeated CriteriaEleRequest criteriaList = 2;
+// }
 
 message SuggestQuestionsResponse {
     repeated Question questionList = 1;
+}
+
+message SuggestQuestionsRequest {
+    string name = 1;
+    string description =2;
+    repeated string fields = 3;
+    string duration = 4;
+    string difficulty = 5;
+    string question_type = 6;
+    string language = 7;
+    int32 options = 8;
+    int32 number_of_question = 9;
+    string candidate_seniority = 10;
+    string context = 11;   
 }
