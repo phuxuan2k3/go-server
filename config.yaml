@@ -1,6 +1,9 @@
 llm:
   host: ${LLM_HOST}
   model: ${LLM_MODEL}
+llm_grpc:
+  host: ${LLM_GRPC_HOST}
+  port: ${LLM_GRPC_PORT}
 grpc:
   host: "0.0.0.0"
   port: 50051

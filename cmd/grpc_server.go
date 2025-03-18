@@ -2,7 +2,8 @@ package cmd
 
 import (
 	"darius/internal/handler"
-	"darius/internal/llm"
+	llm_grpc "darius/internal/llm-grpc"
+
 	hello "darius/pkg/proto/hello"
 	suggest "darius/pkg/proto/suggest"
 	"fmt"
@@ -10,20 +11,22 @@ import (
 	"net"
 	"strings"
 
+	"flag"
+
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 func startGRPC() {
+	//server gateway
 	port := viper.GetString("grpc.port")
 	listener, err := net.Listen("tcp", ":"+port)
 	if err != nil {
 		log.Fatalf("Failed to listen: %v", err)
 	}
 
-	// fmt.Println("get env config.yaml" + viper.GetString("llm.host"))
-	// fmt.Println("get env config.yaml" + viper.GetString("llm.model"))
-
+	//get llm host and model
 	llmHost := viper.GetString("llm.host")
 	if llmHost == "" || !strings.HasPrefix(llmHost, "http") {
 		llmHost = "http://104.199.250.71:2525/api/chat/completions"
@@ -32,15 +35,43 @@ func startGRPC() {
 	if llmModel == "" || strings.HasPrefix(llmModel, "$") {
 		llmModel = "gpt-4o-mini"
 	}
-	fmt.Println("llmHost: " + llmHost)
-	fmt.Println("llmModel: " + llmModel)
-	LlmService := llm.NewLLM(&llm.Config{
-		Host:  llmHost,
-		Model: llmModel,
-	})
+
+	llmGRPCAddress := viper.GetString("llm_grpc.host")
+	if llmGRPCAddress == "" || strings.HasPrefix(llmGRPCAddress, "$") {
+		llmGRPCAddress = "104.199.250.71"
+	}
+	llmGRPCPort := viper.GetString("llm_grpc.port")
+	if llmGRPCPort == "" || strings.HasPrefix(llmGRPCPort, "$") {
+		llmGRPCPort = "2524"
+	}
+	addr := flag.String("addr", llmGRPCAddress+":"+llmGRPCPort, "the address to connect to")
+	flag.Parse()
+	conn, err := grpc.NewClient(*addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		log.Fatalf("did not connect: %v", err)
+	}
+	defer conn.Close()
+
+	arceusClient := suggest.NewArceusClient(conn)
+	llmGRPCService := llm_grpc.NewService(arceusClient, llmModel)
+
+	// r, err := c.GenerateText(context.Background(),
+	// 	&suggest.GenerateTextRequest{
+	// 		Model:   llmModel,
+	// 		Content: "Hello, how are you?"})
+
+	// LlmService := llm.NewLLM(&llm.Config{
+	// 	Host:  llmHost,
+	// 	Model: llmModel,
+	// })
+	// if err != nil {
+	// 	log.Fatalf("could not greet: %v", err)
+	// }
+	// log.Printf("Greeting: %s", r.Content)
 
 	handler := handler.NewHandlerWithDeps(handler.Dependency{
-		LlmService: LlmService,
+		// LlmService: LlmService,
+		LLMGRPC: llmGRPCService,
 	})
 
 	grpcServer := grpc.NewServer()

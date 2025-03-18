@@ -10,8 +10,6 @@ import (
 	"regexp"
 	"strings"
 	"unicode"
-
-	"github.com/spf13/viper"
 )
 
 func (h *handler) SuggestOptions(ctx context.Context, req *suggest.SuggestOptionsRequest) (*suggest.SuggestOptionsResponse, error) {
@@ -95,9 +93,6 @@ Now, based on the user's input, generate the output in the specified format.
 	llmResponse, err := h.llmService.Generate(ctx, &llm.LLMRequest{
 		Content: prompt,
 	})
-	if err != nil {
-		return nil, err
-	}
 
 	input := llmResponse.Content
 
@@ -175,16 +170,18 @@ You are an expert in creating test questions and answers. Your task is to genera
 Now, based on the user's input, generate the output in the specified format
 
 	`, req.GetName(), req.GetDescription(), req.GetFields(), req.GetDuration(), req.GetDifficulty(), req.GetQuestionType(), req.GetLanguage(), req.GetOptions(), req.GetNumberOfQuestion(), req.GetCandidateSeniority(), req.GetContext())
-	fmt.Println(prompt)
-
-	llmResponse, err := h.llmService.Generate(ctx, &llm.LLMRequest{
-		Model:   viper.GetString("llm.model"),
-		Content: prompt,
-	})
+	// llmResponse, err := h.llmService.Generate(ctx, &llm.LLMRequest{
+	// 	Model:   viper.GetString("llm.model"),
+	// 	Content: prompt,
+	// })
+	llmResponse, err := h.llmGRPCService.Generate(ctx, prompt)
 	if err != nil {
 		return nil, err
 	}
-	input := llmResponse.Content
+	if err != nil {
+		return nil, err
+	}
+	input := llmResponse
 
 	jsonStr, err := extractJSONQuestions(input)
 	if err != nil {
