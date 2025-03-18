@@ -27,14 +27,14 @@ func startGRPC() {
 	}
 
 	//get llm host and model
-	llmHost := viper.GetString("llm.host")
-	if llmHost == "" || !strings.HasPrefix(llmHost, "http") {
-		llmHost = "http://104.199.250.71:2525/api/chat/completions"
-	}
-	llmModel := viper.GetString("llm.model")
-	if llmModel == "" || strings.HasPrefix(llmModel, "$") {
-		llmModel = "gpt-4o-mini"
-	}
+	// llmHost := viper.GetString("llm.host")
+	// if llmHost == "" || !strings.HasPrefix(llmHost, "http") {
+	// 	llmHost = "http://104.199.250.71:2525/api/chat/completions"
+	// }
+	// llmModel := viper.GetString("llm.model")
+	// if llmModel == "" || strings.HasPrefix(llmModel, "$") {
+	// 	llmModel = "gpt-4o-mini"
+	// }
 
 	llmGRPCAddress := viper.GetString("llm_grpc.host")
 	if llmGRPCAddress == "" || strings.HasPrefix(llmGRPCAddress, "$") {
@@ -43,6 +43,10 @@ func startGRPC() {
 	llmGRPCPort := viper.GetString("llm_grpc.port")
 	if llmGRPCPort == "" || strings.HasPrefix(llmGRPCPort, "$") {
 		llmGRPCPort = "2524"
+	}
+	llmGRPCModel := viper.GetString("llm.model")
+	if llmGRPCModel == "" || strings.HasPrefix(llmGRPCModel, "$") {
+		llmGRPCModel = "gpt-4o-mini"
 	}
 	addr := flag.String("addr", llmGRPCAddress+":"+llmGRPCPort, "the address to connect to")
 	flag.Parse()
@@ -53,7 +57,7 @@ func startGRPC() {
 	defer conn.Close()
 
 	arceusClient := suggest.NewArceusClient(conn)
-	llmGRPCService := llm_grpc.NewService(arceusClient, llmModel)
+	llmGRPCService := llm_grpc.NewService(arceusClient, llmGRPCModel)
 
 	// r, err := c.GenerateText(context.Background(),
 	// 	&suggest.GenerateTextRequest{
