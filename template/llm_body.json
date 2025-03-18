@@ -1,0 +1,13 @@
+{
+    "name": "Algorithms Test",
+    "description": "Knowledge about various searching and sorting algorithms",
+    "fields": ["Programing", "Algorithms"],
+    "duration": "30",
+    "difficulty": "easy",
+      "question_type": "multiple_choice",
+      "language": "en",
+      "options": 4,
+      "number_of_question": 3,
+      "candidate_seniority": "intern",
+      "context": "This is a super fucking long string"   
+}

@@ -24,7 +24,8 @@ type llmInstance struct {
 func NewLLM(config *Config) *llmInstance {
 	if config == nil {
 		config = &Config{
-			Host: viper.GetString("llm.host"),
+			Host:  viper.GetString("llm.host"),
+			Model: viper.GetString("llm.model"),
 		}
 	}
 	return &llmInstance{
@@ -34,7 +35,7 @@ func NewLLM(config *Config) *llmInstance {
 
 func (l *llmInstance) Generate(ctx context.Context, req *LLMRequest) (*LLMResponse, error) {
 	url := l.config.Host
-	req.Model = viper.GetString("llm.model")
+	req.Model = l.config.Model
 	data, err := json.Marshal(req)
 	if err != nil {
 		fmt.Println("Error marshalling request:", err)

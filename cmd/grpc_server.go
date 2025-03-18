@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"strings"
 
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
@@ -23,8 +24,19 @@ func startGRPC() {
 	// fmt.Println("get env config.yaml" + viper.GetString("llm.host"))
 	// fmt.Println("get env config.yaml" + viper.GetString("llm.model"))
 
+	llmHost := viper.GetString("llm.host")
+	if llmHost == "" || !strings.HasPrefix(llmHost, "http") {
+		llmHost = "http://104.199.250.71:2525/api/chat/completions"
+	}
+	llmModel := viper.GetString("llm.model")
+	if llmModel == "" || strings.HasPrefix(llmModel, "$") {
+		llmModel = "gpt-4o-mini"
+	}
+	fmt.Println("llmHost: " + llmHost)
+	fmt.Println("llmModel: " + llmModel)
 	LlmService := llm.NewLLM(&llm.Config{
-		Host: viper.GetString("llm.host"),
+		Host:  llmHost,
+		Model: llmModel,
 	})
 
 	handler := handler.NewHandlerWithDeps(handler.Dependency{

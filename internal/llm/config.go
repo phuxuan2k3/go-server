@@ -1,5 +1,6 @@
 package llm
 
 type Config struct {
-	Host string
+	Host  string
+	Model string
 }
