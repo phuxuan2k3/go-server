@@ -93,15 +93,14 @@ Now, based on the user's input, generate the output in the specified format.
 `, generalInfo, criteriaList)
 
 	llmResponse, err := h.llmService.Generate(ctx, &llm.LLMRequest{
-		Model:  viper.GetString("llm.model"),
-		Prompt: prompt,
-		Stream: false,
+		Model:   viper.GetString("llm.model"),
+		Content: prompt,
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	input := llmResponse.Response
+	input := llmResponse.Content
 
 	jsonStr, err := extractJSONQuestions(input)
 	if err != nil {
@@ -180,14 +179,13 @@ Now, based on the user's input, generate the output in the specified format
 	fmt.Println(prompt)
 
 	llmResponse, err := h.llmService.Generate(ctx, &llm.LLMRequest{
-		Model:  viper.GetString("llm.model"),
-		Prompt: prompt,
-		Stream: false,
+		Model:   viper.GetString("llm.model"),
+		Content: prompt,
 	})
 	if err != nil {
 		return nil, err
 	}
-	input := llmResponse.Response
+	input := llmResponse.Content
 
 	jsonStr, err := extractJSONQuestions(input)
 	if err != nil {

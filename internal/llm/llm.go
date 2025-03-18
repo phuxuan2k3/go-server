@@ -76,9 +76,8 @@ func (l *llmInstance) GenerateCriteria(ctx context.Context, req *LLMRequest) (*L
 	//xtodo : implement the logic to generate LLM
 
 	return &LLMResponse{
-		Model:      "",
 		Created_at: "",
-		Response: fmt.Sprintf(`
+		Content: fmt.Sprintf(`
 				[
 		  {
 		    "criteria": "Question Type",
@@ -102,7 +101,6 @@ func (l *llmInstance) GenerateCriteria(ctx context.Context, req *LLMRequest) (*L
 		  }
 		]
 				`),
-		Done_reason: "",
 	}, nil
 }
 func (l *llmInstance) GenerateQuestion(ctx context.Context, req *LLMRequest) (*LLMResponse, error) {
@@ -110,7 +108,7 @@ func (l *llmInstance) GenerateQuestion(ctx context.Context, req *LLMRequest) (*L
 	//xtodo : implement the logic to generate LLM
 
 	return &LLMResponse{
-		Response: fmt.Sprintf(`
+		Content: fmt.Sprintf(`
 		[
     {
         "questionContent": "What is the solution to the equation 2x + 3 = 7?",
