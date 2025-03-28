@@ -2,20 +2,14 @@ package cmd
 
 import (
 	"darius/internal/handler"
-	llm_grpc "darius/internal/llm-grpc"
 
 	hello "darius/pkg/proto/hello"
-	suggest "darius/pkg/proto/suggest"
 	"fmt"
 	"log"
 	"net"
-	"strings"
-
-	"flag"
 
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 )
 
 func startGRPC() {
@@ -36,28 +30,28 @@ func startGRPC() {
 	// 	llmModel = "gpt-4o-mini"
 	// }
 
-	llmGRPCAddress := viper.GetString("llm_grpc.host")
-	if llmGRPCAddress == "" || strings.HasPrefix(llmGRPCAddress, "$") {
-		llmGRPCAddress = "104.199.250.71"
-	}
-	llmGRPCPort := viper.GetString("llm_grpc.port")
-	if llmGRPCPort == "" || strings.HasPrefix(llmGRPCPort, "$") {
-		llmGRPCPort = "2524"
-	}
-	llmGRPCModel := viper.GetString("llm.model")
-	if llmGRPCModel == "" || strings.HasPrefix(llmGRPCModel, "$") {
-		llmGRPCModel = "gpt-4o-mini"
-	}
-	addr := flag.String("addr", llmGRPCAddress+":"+llmGRPCPort, "the address to connect to")
-	flag.Parse()
-	conn, err := grpc.NewClient(*addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
-	if err != nil {
-		log.Fatalf("did not connect: %v", err)
-	}
-	defer conn.Close()
+	// llmGRPCAddress := viper.GetString("llm_grpc.host")
+	// if llmGRPCAddress == "" || strings.HasPrefix(llmGRPCAddress, "$") {
+	// 	llmGRPCAddress = "104.199.250.71"
+	// }
+	// llmGRPCPort := viper.GetString("llm_grpc.port")
+	// if llmGRPCPort == "" || strings.HasPrefix(llmGRPCPort, "$") {
+	// 	llmGRPCPort = "2524"
+	// }
+	// llmGRPCModel := viper.GetString("llm.model")
+	// if llmGRPCModel == "" || strings.HasPrefix(llmGRPCModel, "$") {
+	// 	llmGRPCModel = "gpt-4o-mini"
+	// }
+	// addr := flag.String("addr", llmGRPCAddress+":"+llmGRPCPort, "the address to connect to")
+	// flag.Parse()
+	// conn, err := grpc.NewClient(*addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	// if err != nil {
+	// 	log.Fatalf("did not connect: %v", err)
+	// }
+	// defer conn.Close()
 
-	arceusClient := suggest.NewArceusClient(conn)
-	llmGRPCService := llm_grpc.NewService(arceusClient, llmGRPCModel)
+	// arceusClient := suggest.NewArceusClient(conn)
+	// llmGRPCService := llm_grpc.NewService(arceusClient, llmGRPCModel)
 
 	// r, err := c.GenerateText(context.Background(),
 	// 	&suggest.GenerateTextRequest{
@@ -75,12 +69,13 @@ func startGRPC() {
 
 	handler := handler.NewHandlerWithDeps(handler.Dependency{
 		// LlmService: LlmService,
-		LLMGRPC: llmGRPCService,
+		// LLMGRPC: llmGRPCService,
+		LLMGRPC: nil,
 	})
 
 	grpcServer := grpc.NewServer()
 	hello.RegisterHelloServiceServer(grpcServer, handler)
-	suggest.RegisterSuggestServiceServer(grpcServer, handler)
+	// suggest.RegisterSuggestServiceServer(grpcServer, handler)
 
 	fmt.Println("gRPC server listening on port " + port)
 	if err := grpcServer.Serve(listener); err != nil {

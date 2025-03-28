@@ -21,6 +21,9 @@ type handler struct {
 }
 
 func NewHandlerWithDeps(deps Dependency) *handler {
+	if deps.LlmService == nil {
+		return &handler{}
+	}
 	return &handler{
 		llmService:     deps.LlmService,
 		llmGRPCService: deps.LLMGRPC,

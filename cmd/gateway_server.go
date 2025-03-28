@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"context"
-	suggest "darius/pkg/proto/suggest"
+	"darius/pkg/proto/hello"
 	"log"
 	"net/http"
 
@@ -46,7 +46,7 @@ func startGateway() {
 
 	grpcPort := viper.GetString("grpc.port")
 
-	err := suggest.RegisterSuggestServiceHandlerFromEndpoint(context.Background(), mux, "localhost:"+grpcPort, opts)
+	err := hello.RegisterHelloServiceHandlerFromEndpoint(context.Background(), mux, "localhost:"+grpcPort, opts)
 	if err != nil {
 		log.Fatalf("Failed to register gateway: %v", err)
 	}

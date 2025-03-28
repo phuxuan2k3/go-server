@@ -19,13 +19,15 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	HelloService_SayHello_FullMethodName = "/hello.HelloService/SayHello"
+	HelloService_HelloWorld_FullMethodName = "/hello.HelloService/HelloWorld"
+	HelloService_SayHello_FullMethodName   = "/hello.HelloService/SayHello"
 )
 
 // HelloServiceClient is the client API for HelloService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type HelloServiceClient interface {
+	HelloWorld(ctx context.Context, in *HelloRequest, opts ...grpc.CallOption) (*HelloResponse, error)
 	SayHello(ctx context.Context, in *HelloRequest, opts ...grpc.CallOption) (*HelloResponse, error)
 }
 
@@ -35,6 +37,16 @@ type helloServiceClient struct {
 
 func NewHelloServiceClient(cc grpc.ClientConnInterface) HelloServiceClient {
 	return &helloServiceClient{cc}
+}
+
+func (c *helloServiceClient) HelloWorld(ctx context.Context, in *HelloRequest, opts ...grpc.CallOption) (*HelloResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(HelloResponse)
+	err := c.cc.Invoke(ctx, HelloService_HelloWorld_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *helloServiceClient) SayHello(ctx context.Context, in *HelloRequest, opts ...grpc.CallOption) (*HelloResponse, error) {
@@ -51,6 +63,7 @@ func (c *helloServiceClient) SayHello(ctx context.Context, in *HelloRequest, opt
 // All implementations must embed UnimplementedHelloServiceServer
 // for forward compatibility.
 type HelloServiceServer interface {
+	HelloWorld(context.Context, *HelloRequest) (*HelloResponse, error)
 	SayHello(context.Context, *HelloRequest) (*HelloResponse, error)
 	mustEmbedUnimplementedHelloServiceServer()
 }
@@ -62,6 +75,9 @@ type HelloServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedHelloServiceServer struct{}
 
+func (UnimplementedHelloServiceServer) HelloWorld(context.Context, *HelloRequest) (*HelloResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method HelloWorld not implemented")
+}
 func (UnimplementedHelloServiceServer) SayHello(context.Context, *HelloRequest) (*HelloResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SayHello not implemented")
 }
@@ -84,6 +100,24 @@ func RegisterHelloServiceServer(s grpc.ServiceRegistrar, srv HelloServiceServer)
 		t.testEmbeddedByValue()
 	}
 	s.RegisterService(&HelloService_ServiceDesc, srv)
+}
+
+func _HelloService_HelloWorld_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(HelloRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(HelloServiceServer).HelloWorld(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: HelloService_HelloWorld_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(HelloServiceServer).HelloWorld(ctx, req.(*HelloRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _HelloService_SayHello_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -111,6 +145,10 @@ var HelloService_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "hello.HelloService",
 	HandlerType: (*HelloServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "HelloWorld",
+			Handler:    _HelloService_HelloWorld_Handler,
+		},
 		{
 			MethodName: "SayHello",
 			Handler:    _HelloService_SayHello_Handler,
