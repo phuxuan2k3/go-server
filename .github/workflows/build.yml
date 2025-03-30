@@ -22,7 +22,7 @@ jobs:
           GOOS=linux GOARCH=amd64 go build -o myservice  # Build binary cho Linux
 
       - name: Upload binary
-        uses: actions/upload-artifact@v3  # Lưu file binary lại để tải về
+        uses: actions/upload-artifact@v4  # Lưu file binary lại để tải về
         with:
           name: myservice
           path: myservice
