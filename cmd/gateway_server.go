@@ -44,14 +44,14 @@ func startGateway() {
 	// 	log.Fatalf("Failed to register gateway: %v", err)
 	// }
 
-	grpcPort := viper.GetString("grpc.port")
+	grpcPort := viper.GetString("GRPC_PORT")
 
 	err := hello.RegisterHelloServiceHandlerFromEndpoint(context.Background(), mux, "localhost:"+grpcPort, opts)
 	if err != nil {
 		log.Fatalf("Failed to register gateway: %v", err)
 	}
 
-	gatewayPort := viper.GetString("gateway.port")
+	gatewayPort := viper.GetString("GATEWAY_PORT")
 	log.Println("HTTP Gateway running on port " + gatewayPort)
 
 	server := &http.Server{

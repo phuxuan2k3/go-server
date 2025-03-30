@@ -14,7 +14,7 @@ import (
 
 func startGRPC() {
 	//server gateway
-	port := viper.GetString("grpc.port")
+	port := viper.GetString("GRPC_PORT")
 	listener, err := net.Listen("tcp", ":"+port)
 	if err != nil {
 		log.Fatalf("Failed to listen: %v", err)

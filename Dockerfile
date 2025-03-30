@@ -38,8 +38,10 @@ FROM golang AS builder
 WORKDIR /app
 COPY . .
 RUN go mod tidy
-RUN go build -o go-server
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o go-server
 FROM alpine:latest
 WORKDIR /root/
 COPY --from=builder /app/go-server .
+COPY config.yaml /root/config.yaml
+RUN chmod +x go-server  
 CMD ["./go-server"]
