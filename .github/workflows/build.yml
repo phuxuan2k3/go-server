@@ -1,0 +1,28 @@
+name: Build Go Binary
+
+on:
+  push:
+    branches:
+      - main  # Chạy khi có code mới trên nhánh main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest  # Chạy trên môi trường Ubuntu
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3  # Clone code về runner
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: 1.21  # Cài đặt Go phiên bản 1.21
+
+      - name: Build binary
+        run: |
+          GOOS=linux GOARCH=amd64 go build -o myservice  # Build binary cho Linux
+
+      - name: Upload binary
+        uses: actions/upload-artifact@v3  # Lưu file binary lại để tải về
+        with:
+          name: myservice
+          path: myservice
