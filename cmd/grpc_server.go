@@ -82,5 +82,5 @@ func startGRPC() {
 		log.Fatalf("Failed to serve: %v", err)
 	}
 
-	fmt.Print("This is the log message that prove that the server is redeployed by owner\n")
+	fmt.Print("This is the log message that prove that the server is redeployed by owner Xuan\n")
 }
