@@ -77,10 +77,10 @@ func startGRPC() {
 	hello.RegisterHelloServiceServer(grpcServer, handler)
 	// suggest.RegisterSuggestServiceServer(grpcServer, handler)
 
+	fmt.Print("This is the log message that prove that the server is redeployed by owner Xuan\n")
+
 	fmt.Println("gRPC server listening on port " + port)
 	if err := grpcServer.Serve(listener); err != nil {
 		log.Fatalf("Failed to serve: %v", err)
 	}
-
-	fmt.Print("This is the log message that prove that the server is redeployed by owner Xuan\n")
 }
