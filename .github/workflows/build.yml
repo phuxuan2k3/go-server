@@ -32,9 +32,9 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa  
-          scp -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa myservice ec2-user@ec2-3-25-117-47.ap-southeast-2.compute.amazonaws.com:/home/ec2-user/myservice
+          scp -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa myservice ec2-user@ec2-3-25-117-47.ap-southeast-2.compute.amazonaws.com:/home/ec2-user/go-server/myservice
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ec2-user@ec2-3-25-117-47.ap-southeast-2.compute.amazonaws.com << 'EOF'
           sudo systemctl restart myservice
-          sudo systemctl status myservice --no-pager
+          sudo systemctl status myservice
           EOF
 
